@@ -1,8 +1,15 @@
+import dotenv
+
+dotenv.load_dotenv()
+
+from app.database.engine import create_db_and_table
+
 import uvicorn
 
-from models.User import User
-from routers.status_router import status_router
-from routers.user__router import user_router
+from app.models.User import User
+from app.routers.status_router import status_router
+from app.routers.user__router import user_router
+from fastapi_pagination import add_pagination
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -23,7 +30,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 app.include_router(user_router)
 app.include_router(status_router)
-
+add_pagination(app)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+    create_db_and_table()
+    uvicorn.run(app, host="localhost", port=8080)

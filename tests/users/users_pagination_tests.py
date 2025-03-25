@@ -1,8 +1,10 @@
+import random
+
 import pytest
 import requests
 from http import HTTPStatus
 
-from models.User import User
+from app.models.User import User
 
 
 @pytest.mark.usefixtures("app_url")
@@ -16,9 +18,8 @@ class TestUsersPagination:
         assert resp_get_user_with_page.status_code == HTTPStatus.OK
         assert len(resp_get_user_with_page.json()) == 5
 
-    # @pytest.mark.usefixtures("pagination_test_data")
-    def test_users_pagination_page_count(self, app_url: str):
-        pagination_test_data = []
+    @pytest.mark.usefixtures("pagination_test_data")
+    def test_users_pagination_page_count(self, app_url: str, pagination_test_data):
         for d in pagination_test_data:
             size = d[0]
             page_count = d[1]
@@ -31,12 +32,10 @@ class TestUsersPagination:
                 resp_get_user_with_page = requests.get(f"{app_url}/users", params=params)
                 print(resp_get_user_with_page.url)
                 if page == page_count + 1:
-                    assert resp_get_user_with_page.json() == []
+                    assert resp_get_user_with_page.json()["items"] == []
                 else:
                     assert resp_get_user_with_page.status_code == HTTPStatus.OK
-                    # assert len(resp_get_user_with_page.json()) == size
-                    assert int(resp_get_user_with_page.headers["x-total-pages"]) == page_count
-
+                    assert resp_get_user_with_page.json()["pages"] == page_count
 
     def test_users_pagination_unique_data(self, app_url):
         page = 1
@@ -48,7 +47,7 @@ class TestUsersPagination:
             }
             resp_get_user_with_page = requests.get(f"{app_url}/users", params=params)
             assert resp_get_user_with_page.status_code == HTTPStatus.OK
-            data = resp_get_user_with_page.json()
+            data = resp_get_user_with_page.json()["items"]
             if not data:
                 break
             new_item = set(u["id"] for u in data)

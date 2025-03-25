@@ -1,18 +1,21 @@
 import json
+import os
+from http import HTTPStatus
+
+import pytest
+import requests
 from faker import Faker
 import random
 
-from models.User import User
+from app.models.User import User, UserCreate
 
 faker = Faker()
 
 
 def generate_random_user() -> User:
-    with open('users.json', 'r') as file:
-        data = json.load(file)
     email = faker.email(domain="qaguru.autotest")
     name = faker.name()
-    user_id: int = 1
-    while any(d.get("id") == user_id for d in data):
-        user_id = random.randint(0, 1000)
-    return User(email=email, name=name, id=user_id)
+    user = UserCreate(email=email, name=name)
+    response = requests.post(f"{os.getenv('BASE_URL')}/users", json=user.model_dump(include={"name", "email"}))
+    assert response.status_code == HTTPStatus.CREATED
+    return User(**response.json())
