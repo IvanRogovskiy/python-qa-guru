@@ -1,7 +1,7 @@
 from typing import Optional, Iterable
 
 from app.database.engine import engine
-from app.models.User import User
+from app.models.User import User, UserUpdate
 from sqlmodel import Session, select
 
 
@@ -24,7 +24,7 @@ def create_user(user: User) -> User:
         return user
 
 
-def update_user(user_id: int, user: User) -> Optional[User]:
+def update_user(user_id: int, user: UserUpdate) -> Optional[User]:
     with Session(engine) as s:
         db_user = s.get(User, user_id)
         user_data = user.model_dump(exclude_unset=True)

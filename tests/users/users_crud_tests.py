@@ -3,8 +3,8 @@ from http import HTTPStatus
 
 import pytest
 import requests
+from faker import Faker
 
-from app.models.User import User
 from tests.utils.data_generator import generate_random_user
 
 
@@ -20,7 +20,8 @@ class TestUsers:
         assert resp_create_user.status_code == HTTPStatus.CREATED
         resp_get_user = requests.get(f"{app_url}/users/{resp_create_user.json()['id']}")
         assert resp_get_user.status_code == 200
-        assert resp_get_user.json()
+        assert resp_get_user.json()["name"] == random_user.name
+        assert resp_get_user.json()["email"] == random_user.email
 
     @pytest.mark.parametrize("name, email", [
         ("Ivan Ptushkin", "ivapt.ru")
@@ -34,8 +35,32 @@ class TestUsers:
         assert resp_create_user.status_code == 400
         assert "An email address must have an @-sign" in resp_create_user.json()["detail"]
 
-    def test_delete_user(self, app_url):
-        new_user: User = generate_random_user()
+    def test_patch_user(self, app_url, new_user):
+        faker = Faker()
+        body = {
+            "name": faker.name(),
+            "email": new_user.email
+        }
+        resp_patch_user = requests.patch(f"{app_url}/users/{new_user.id}", json=body)
+        assert resp_patch_user.status_code == HTTPStatus.OK
+        resp_get_user = requests.get(f"{app_url}/users/{new_user.id}")
+        assert resp_get_user.status_code == 200
+        body["id"] = new_user.id
+        assert resp_get_user.json() == body
+
+    def test_patch_user_fail_to_change_id(self, app_url, new_user, existing_user_id):
+        body = {
+            "name": new_user.name,
+            "email": new_user.email,
+            "id": existing_user_id
+        }
+        resp_patch_user = requests.patch(f"{app_url}/users/{new_user.id}", json=body)
+        assert resp_patch_user.status_code == HTTPStatus.OK
+        resp_get_user = requests.get(f"{app_url}/users/{new_user.id}")
+        assert resp_get_user.status_code == 200
+        resp_get_user.json()["id"] = new_user.id
+
+    def test_delete_user(self, app_url, new_user):
         resp_delete_user = requests.delete(f"{app_url}/users/{new_user.id}")
         assert resp_delete_user.status_code == 200
         resp_get_user = requests.get(f"{app_url}/users/{new_user.id}")

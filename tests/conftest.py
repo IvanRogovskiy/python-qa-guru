@@ -7,7 +7,7 @@ import pytest
 import requests
 from faker import Faker
 
-from app.models.User import UserCreate
+from app.models.User import UserCreate, User
 from tests.utils.data_generator import generate_random_user
 
 
@@ -45,12 +45,23 @@ def random_user():
     return UserCreate(email=email, name=name)
 
 
-# @pytest.fixture()
-# def user(app_url, random_user) -> User:
-#     user: UserCreate = random_user
-#     response = requests.post(f"{app_url}/users", json=user.model_dump(include={"name", "email"}))
-#     assert response.status_code == HTTPStatus.CREATED
-#     return User(**response.json())
+@pytest.fixture()
+def new_user(app_url, random_user) -> User:
+    user: UserCreate = random_user
+    response = requests.post(f"{app_url}/users", json=user.model_dump(include={"name", "email"}))
+    assert response.status_code == HTTPStatus.CREATED
+
+    yield User(**response.json())
+
+    requests.delete(f"{app_url}/users/{response.json()['id']}")
+
+
+@pytest.fixture()
+def existing_user_id(app_url) -> User:
+    user: UserCreate = random_user
+    # all_users_ids = [user.id for user in requests.get(f"{app_url}/users").json()["items"]]
+    random_id = random.choice(requests.get(f"{app_url}/users").json()["items"])["id"]
+    return random_id
 
 
 # @pytest.fixture(scope="module")
@@ -76,7 +87,5 @@ def pagination_test_data(fill_test_users) -> list[tuple]:
     users_for_test = fill_test_users
     users_count = len(users_for_test)
     size = random.randint(1, users_count)
-    # res.append((users_count, 1))
-    # res.append((1, users_count))
     res.append((size, (users_count + size - 1) // size))
     return res

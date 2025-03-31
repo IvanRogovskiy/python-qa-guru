@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import EmailStr, BaseModel, HttpUrl
+from pydantic import EmailStr, BaseModel, HttpUrl, ConfigDict
 
 from sqlmodel import SQLModel, Field
 
@@ -12,6 +12,7 @@ class User(SQLModel, table=True):
 
 
 class UserCreate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     email: EmailStr
     name: str
 

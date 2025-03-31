@@ -16,13 +16,11 @@ user_router = APIRouter()
 
 
 @user_router.post("/api/users", status_code=HTTPStatus.CREATED)
-def create_user(user: UserCreate):
+def create_user(user: User):
     try:
-        UserCreate.model_validate(user.model_dump())
+        UserCreate.model_validate(user.model_dump(exclude={"id"}))
     except ValidationError as e:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"{e}")
-    except AttributeError as ae:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"{ae}")
     if users.get_user(user.id):
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"User with id: {user.id} already exist")
     return users.create_user(user)
@@ -46,7 +44,7 @@ def get_users() -> Iterable[User]:
 
 
 @user_router.patch("/api/users/{user_id}")
-def update_user(user_id, user: User) -> Optional[User]:
+def update_user(user_id, user: UserUpdate) -> Optional[User]:
     UserUpdate.model_validate(user)
     if not users.get_user(user_id):
         raise HTTPException(status_code=404, detail=f"User with id {user_id} not found")
