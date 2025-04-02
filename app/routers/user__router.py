@@ -16,7 +16,7 @@ user_router = APIRouter()
 
 
 @user_router.post("/api/users", status_code=HTTPStatus.CREATED)
-def create_user(user: User):
+def create_user(user: User) -> User:
     try:
         UserCreate.model_validate(user.model_dump(exclude={"id"}))
     except ValidationError as e:

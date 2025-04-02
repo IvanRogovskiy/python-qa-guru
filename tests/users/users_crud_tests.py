@@ -6,6 +6,7 @@ import requests
 from faker import Faker
 
 from tests.utils.data_generator import generate_random_user
+from app.models.User import User
 
 
 class TestUsers:
@@ -17,6 +18,7 @@ class TestUsers:
             "email": random_user.email,
         }
         resp_create_user = requests.post(f"{app_url}/users", json=body)
+        User.model_validate(resp_create_user.json())
         assert resp_create_user.status_code == HTTPStatus.CREATED
         resp_get_user = requests.get(f"{app_url}/users/{resp_create_user.json()['id']}")
         assert resp_get_user.status_code == 200
@@ -42,6 +44,7 @@ class TestUsers:
             "email": new_user.email
         }
         resp_patch_user = requests.patch(f"{app_url}/users/{new_user.id}", json=body)
+        User.model_validate(resp_patch_user.json())
         assert resp_patch_user.status_code == HTTPStatus.OK
         resp_get_user = requests.get(f"{app_url}/users/{new_user.id}")
         assert resp_get_user.status_code == 200
