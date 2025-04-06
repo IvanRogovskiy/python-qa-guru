@@ -17,6 +17,11 @@ def envs():
 
 
 @pytest.fixture(scope="session")
+def env(envs):
+    return os.getenv("ENV")
+
+
+@pytest.fixture(scope="session")
 def app_url():
     print("Настройка фикстуры")
     return os.getenv("BASE_URL")
