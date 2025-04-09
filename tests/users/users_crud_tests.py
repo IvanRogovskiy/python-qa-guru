@@ -20,6 +20,10 @@ class TestUsers:
         response: ResponseGetUser = user_service.get_user(new_user.id)
         assert S(user) == response.json
 
+    def test_user_get_with_adoption(self, app_url, new_user, users_api):
+        response: ResponseGetUser = users_api.get_user(new_user.id)
+        assert S(user) == response.json
+
     def test_post_user(self, app_url):
         random_user = generate_random_user()
         body = {

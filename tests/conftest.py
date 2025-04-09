@@ -8,7 +8,24 @@ import requests
 from faker import Faker
 
 from app.models.User import UserCreate, User
+from tests.service.user_service_class import UserService
 from tests.utils.data_generator import generate_random_user
+
+
+def pytest_addoption(parser):
+    parser.addoption("--env", default="local")
+
+
+@pytest.fixture(scope="session")
+def env(request):
+    return request.config.getoption("--env")
+
+
+@pytest.fixture(scope="session")
+def users_api(env):
+    users_service = UserService(env)
+    yield users_service
+    users_service.session.close()
 
 
 @pytest.fixture(scope="session", autouse=True)

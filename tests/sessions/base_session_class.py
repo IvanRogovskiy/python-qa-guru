@@ -12,5 +12,5 @@ class UserSession(Session):
     def request(self, method, url, **kwargs):
         url: str = self.base_url + url
         response: Response = super().request(method, url, **kwargs)
-        logging.info(curlify.to_curl(response.request))
+        logging.debug(curlify.to_curl(response.request))
         return response
