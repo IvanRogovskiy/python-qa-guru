@@ -5,7 +5,9 @@ python-dotenv
 requests
 pydantic
 faker
-
+curlify
+voluptuous
+pytest-voluptuous
 psycopg2-binary
 sqlalchemy
 sqlmodel

@@ -1,1 +1,5 @@
-base_url = "http://0.0.0.0:8000/api"
+class Server:
+    def __init__(self, env):
+        self.users_app = {
+            "local": "http://localhost:8080"
+        }[env]
