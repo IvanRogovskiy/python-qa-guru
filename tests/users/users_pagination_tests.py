@@ -9,6 +9,7 @@ from app.models.User import User
 
 @pytest.mark.usefixtures("app_url")
 class TestUsersPagination:
+
     def test_users_pagination_size(self, app_url):
         params: dict = {
             "page": 1,
@@ -19,6 +20,7 @@ class TestUsersPagination:
         assert len(resp_get_user_with_page.json()) == 5
 
     @pytest.mark.usefixtures("pagination_test_data")
+    #TODO починить
     def test_users_pagination_page_count(self, app_url: str, pagination_test_data):
         for d in pagination_test_data:
             size = d[0]

@@ -5,16 +5,21 @@ from http import HTTPStatus
 import dotenv
 import pytest
 import requests
+import logging
 from faker import Faker
 
 from app.models.User import UserCreate, User
 from tests.service.user_service_class import UserService
 from tests.utils.data_generator import generate_random_user
 
+def pytest_configure(config):
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
 
 def pytest_addoption(parser):
     parser.addoption("--env", default="local")
-
 
 @pytest.fixture(scope="session")
 def env(request):
@@ -33,14 +38,13 @@ def envs():
     dotenv.load_dotenv()
 
 
-@pytest.fixture(scope="session")
-def env(envs):
-    return os.getenv("ENV")
+# @pytest.fixture(scope="session")
+# def env(envs):
+#     return os.getenv("ENV")
 
 
 @pytest.fixture(scope="session")
 def app_url():
-    print("Настройка фикстуры")
     return os.getenv("BASE_URL")
 
 
@@ -68,7 +72,7 @@ def random_user():
 
 
 @pytest.fixture()
-def new_user(app_url, random_user) -> User:
+def new_user(app_url, random_user):
     user: UserCreate = random_user
     response = requests.post(f"{app_url}/users", json=user.model_dump(include={"name", "email"}))
     assert response.status_code == HTTPStatus.CREATED

@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 from http import HTTPStatus
 
 import pytest
@@ -16,7 +18,7 @@ from pytest_voluptuous import S
 class TestUsers:
 
     def test_user_get(self, app_url, new_user):
-        user_service: UserService = UserService(app_url)
+        user_service: UserService = UserService("local")
         response: ResponseGetUser = user_service.get_user(new_user.id)
         assert S(user) == response.json
 
